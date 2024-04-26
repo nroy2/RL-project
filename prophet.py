@@ -5,12 +5,11 @@ import numpy as np
 import random
 
 class ProphetInequalityEnv(Env):
-    def __init__(self, num_items=100):
+    def __init__(self, values, num_items=100):
         super(ProphetInequalityEnv, self).__init__()
-        # Number of total items
+        # Number of total items and values of each item in order that they will be presented
         self.num_items = num_items
-        
-        self.values = [] # TODO: define at some point
+        self.values = values
         
         self.observation_space = Box() # TODO: fill in with state space once we decide
         
