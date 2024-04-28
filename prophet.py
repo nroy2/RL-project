@@ -1,62 +1,61 @@
 import gym
 from gym import Env
-from gym.spaces import Discrete, Box
+from gym.spaces import Discrete, Dict, Box
 import numpy as np
-import random
 
 class ProphetInequalityEnv(Env):
-    def __init__(self, values):
+    def __init__(self, distribution, num_items):
         super(ProphetInequalityEnv, self).__init__()
 
-        # Number of total items and values of each item in order that they will be presented
-        self.values = values
-        self.num_items = len(values)
+        # Number of total items and the distribution the value will be drawn from
+        self.distribution = distribution
+        self.num_items = num_items
 
-        self.current_item = 0
-        self.total_reward = 0
-        self.state = np.zeros(3)
-        self.state[1] = self.num_items
-        self.state[2] = self.values[self.current_item]
-        
-        # State space - defined as tuple of <average rewards seen, number of items left, value of current item>
-        self.observation_space = Box(low=0, high=np.inf, shape=(3,), dtype=np.float32) 
-        
+        # State - defined as tuple of <current item index, current item value>
+        self.item_index = 0
+        self.item_value = self.distribution.rvs()
+
+        # State space
+        self.observation_space = Dict({
+            "item_index": Discrete(self.num_items + 1), # account for beyond the last item
+            "item_value": Box(low=self.distribution.a, high=self.distribution.b, shape=())
+        })
+
         # Actions we can take: pass on reward, or take reward
         self.action_space = Discrete(2)
+
+        # Reward range
+        self.reward_range = (self.distribution.a, self.distribution.b)
+
+    def _get_obs(self):
+        return {"item_index": self.item_index, "item_value": self.item_value}
         
     def step(self, action):
-        
-        reward = self._calculate_reward(action)
+        if action == 1:
+            done = True
+            observation = self._get_obs()
+            reward = self.item_value
 
-        if action==1:
-            return self.state, reward, True, {}
+            return observation, reward, done, {}
+        else:
+            self.item_index = min(self.current_item + 1, self.num_items) # disallowing taking more boxes when it's time
+            if self.item_index < self.num_items:
+                self.item_value = self.distribution.rvs()
+            else:
+                self.item_value = 0
 
-        self.total_reward += self.values[self.current_item]
-        self.state[0] = self.total_reward / (self.current_item + 1)
-        self.state[1] = self.num_items - (self.current_item+1)
-        self.state[2] = self.values[self.current_item]
-        self.current_item += 1
-        
-        done = (self.current_item >= self.num_items)
-        
-        return self.current_item, reward, done, {}
-    
-    def _calculate_reward(self, action):
-        reward = 0
+            done = self.current_item >= self.num_items
+            observation = self._get_obs()
+            reward = 0
 
-        if (self.current_item >= self.num_items-1) or (action == 1):
-            reward =  self.values[self.current_item]
+            return observation, reward, done, {}
 
-        return reward
-    
     def reset(self):
-        self.current_item = 0
-        self.total_reward = 0
-        self.state = np.zeros(2)
-        self.state[1] = self.num_items
-        self.state[2] = self.values[self.current_item]
-        return self.state
-        
+        self.item_index = 0
+        self.item_value = self.distribution.rvs()
+
+        observation = self._get_obs()
+        return observation, {}
+
     def render(self, mode='human'):
         pass
-        

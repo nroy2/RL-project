@@ -1,13 +1,18 @@
 import numpy as np
+from scipy import stats
 from prophet import ProphetInequalityEnv
 
 # Initialize environment
-item_values = [1,2,3,4,5]
-env = ProphetInequalityEnv(values=item_values)
+
+# any non-negative distribution works
+# for example stats.halfnorm() is the |Norm(0, 1)| distribution, stats.uniform(1, 3) is the Unif(1, 4) distribution
+distribution = stats.expon() 
+num_items = 5
+env = ProphetInequalityEnv(distribution=distribution, num_items=num_items)
 
 # Set hyperparameters
 num_episodes = 100
-max_steps_per_episode = len(item_values)
+max_steps_per_episode = num_items
 
 agents = [] #TODO: add agents here - for example, q-learning, sarsa, dqn, so on
 
