@@ -1,27 +1,29 @@
 import numpy as np
 from scipy import stats
 from prophet import ProphetInequalityEnv
+from classic_algos import MedianMaxThreshold, OCRSBased, SingleSampleMaxThreshold
 
 # Initialize environment
 
 # any non-negative distribution works
 # for example stats.halfnorm() is the |Norm(0, 1)| distribution, stats.uniform(1, 3) is the Unif(1, 4) distribution
 distribution = stats.expon() 
-num_items = 5
+num_items = 500
 env = ProphetInequalityEnv(distribution=distribution, num_items=num_items)
 
 # Set hyperparameters
 num_episodes = 100
 max_steps_per_episode = num_items
 
-agents = [] #TODO: add agents here - for example, q-learning, sarsa, dqn, so on
+agents = [MedianMaxThreshold(), OCRSBased(), SingleSampleMaxThreshold()] #TODO: add agents here - for example, q-learning, sarsa, dqn, so on
 
 # Loop over agents
 for agent in agents:
     # Loop over episodes
     for episode in range(num_episodes):
         # Reset the environment for each episode
-        state = env.reset()
+        state, info = env.reset()
+        agent.init_new_episode(info)
         
         # Initialize variables for each episode
         total_reward = 0

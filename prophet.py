@@ -29,33 +29,39 @@ class ProphetInequalityEnv(Env):
 
     def _get_obs(self):
         return {"item_index": self.item_index, "item_value": self.item_value}
-        
+
+    def _get_info(self):
+        return {"distribution": self.distribution, "num_items": self.num_items}
+
     def step(self, action):
         if action == 1:
             done = True
             observation = self._get_obs()
             reward = self.item_value
+            info = self._get_info()
 
-            return observation, reward, done, {}
+            return observation, reward, done, info
         else:
-            self.item_index = min(self.current_item + 1, self.num_items) # disallowing taking more boxes when it's time
+            self.item_index = min(self.item_index + 1, self.num_items) # disallowing taking more boxes when it's time
             if self.item_index < self.num_items:
                 self.item_value = self.distribution.rvs()
             else:
                 self.item_value = 0
 
-            done = self.current_item >= self.num_items
+            done = self.item_index >= self.num_items
             observation = self._get_obs()
+            info = self._get_info()
             reward = 0
 
-            return observation, reward, done, {}
+            return observation, reward, done, info
 
     def reset(self):
         self.item_index = 0
         self.item_value = self.distribution.rvs()
 
         observation = self._get_obs()
-        return observation, {}
+        info = self._get_info()
+        return observation, info
 
     def render(self, mode='human'):
         pass
