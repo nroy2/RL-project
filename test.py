@@ -7,7 +7,7 @@ from classic_algos import MedianMaxThreshold, OCRSBased, SingleSampleMaxThreshol
 
 # any non-negative distribution works
 # for example stats.halfnorm() is the |Norm(0, 1)| distribution, stats.uniform(1, 3) is the Unif(1, 4) distribution
-distribution = stats.expon() 
+distribution = stats.expon()
 num_items = 500
 env = ProphetInequalityEnv(distribution=distribution, num_items=num_items)
 

@@ -31,7 +31,7 @@ class ProphetInequalityEnv(Env):
         return {"item_index": self.item_index, "item_value": self.item_value}
 
     def _get_info(self):
-        return {"distribution": self.distribution, "num_items": self.num_items}
+        return {"distribution": self.distribution, "num_items": self.num_items, "reward_range": self.reward_range}
 
     def step(self, action):
         if action == 1:
@@ -64,4 +64,19 @@ class ProphetInequalityEnv(Env):
         return observation, info
 
     def render(self, mode='human'):
+        pass
+
+class ProphetInequalityAgent(object):
+    def __init__(self):
+        pass
+
+    # This is only restrcited to classic algorithms
+    # RL-based should not use this function
+    def init_new_episode(self, info):
+        pass
+
+    def select_action(self, state) -> int:
+        return 1
+    
+    def update(self, state, action, reward, next_state):
         pass

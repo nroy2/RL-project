@@ -1,4 +1,4 @@
-from agent import ProphetInequalityAgent
+from prophet import ProphetInequalityAgent
 import numpy as np
 
 class MedianMaxThreshold(ProphetInequalityAgent):
