@@ -39,6 +39,21 @@ class SingleSampleMaxThreshold(ProphetInequalityAgent):
             self.threshold = np.max(self.distrib.rvs(self.num_items))
         return item_index == self.num_items - 1 or item_value >= self.threshold
 
+class OptimalAgent(ProphetInequalityAgent):
+    def __init__(self, env: ProphetInequalityEnv):
+        self.name = 'OptimalAgent'
+        info = env._get_info()
+        distrib, num_items = info['distribution'], info['num_items']
+        self.threshold = np.zeros((num_items))
+        
+        last = 0.
+        for i in range(num_items - 1, -1, -1):
+            self.threshold[i] = last
+            last = distrib.expect(lambda x : max(x, last))
+
+    def select_action(self, state):
+        item_index, item_value = state
+        return item_value > self.threshold[int(item_index)]
 
 class RandomChoice(ProphetInequalityAgent):
     def __init__(self, env: ProphetInequalityEnv):
