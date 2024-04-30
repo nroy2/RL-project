@@ -32,3 +32,11 @@ class SarsaLambdaAgent(ProphetInequalityAgent):
             q_old, x, a = q_prime, x_prime, a_prime
         self.total_episode_count += 1
 
+    def save_model(self, fn):
+        with open(fn, 'wb') as f:
+            np.save(f, self.w)
+
+    def load_model(self, fn):
+        with open(fn, 'rb') as f:
+            self.w = np.load(f)
+

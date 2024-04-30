@@ -72,3 +72,9 @@ class ProphetInequalityAgent(object):
 
     def train_one_episode(self):
         pass
+    
+    def save_model(self, fn):
+        pass
+
+    def load_model(self, fn):
+        pass

@@ -17,6 +17,7 @@ class StateActionFeatureVectorWithTile():
         tile_width: tile width for each dimension
         """
         self.tile_width, self.num_tilings, self.num_actions = tile_width, num_tilings, num_actions
+        self.low, self.high = state_low, state_high
         self.tiles_dim = np.ceil((state_high - state_low) / tile_width) + 1
         self.start_positions = []
         for i in range(num_tilings):
@@ -35,9 +36,10 @@ class StateActionFeatureVectorWithTile():
         """
         d = self.feature_vector_len()
         answer = np.zeros((d))
+        ns = np.maximum(self.low, np.minimum(s, self.high))
         dims = np.concatenate((np.array([self.num_actions, self.num_tilings]), self.tiles_dim))
         for i in range(self.num_tilings):
-            current_position = np.floor((s - self.start_positions[i]) / self.tile_width)
+            current_position = np.floor((ns - self.start_positions[i]) / self.tile_width)
             current_position = np.concatenate((np.array([a, i]), current_position))
             index = np.ravel_multi_index(current_position.astype(int), dims.astype(int))
             answer[index] = 1
