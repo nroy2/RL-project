@@ -12,10 +12,9 @@ import numpy as np
 import random
 
 class DQN(ProphetInequalityAgent):
-    def __init__(self, env):
-        self.name = 'DQN'
+    def __init__(self, env, name):
+        super().__init__(env, name)
 
-        self.env     = env
         self.memory  = deque(maxlen=2000)
         
         self.gamma = 0.85

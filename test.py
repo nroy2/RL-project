@@ -6,7 +6,7 @@ from prophet import ProphetInequalityEnv
 import os
 
 from tile_coding import StateActionFeatureVectorWithTile
-from nn import VApproximationWithNN, PiApproximationWithNN
+from nn import VApproximationWithNN, PiApproximationWithNN, Baseline
 
 from classic_algos import *
 from sarsa import SarsaLambdaAgent
@@ -30,7 +30,6 @@ def train_and_compare_models(test_name, distribution, num_items, num_episodes, e
 
     # Tile coding for SARSA Agent
     reward_low, reward_high = distribution.interval(confidence=0.999)
-    print(reward_low, reward_high)
     tile_coding = StateActionFeatureVectorWithTile(
         state_low=np.array([0, reward_low]),
         state_high=np.array([num_items + 1, reward_high]),
@@ -39,19 +38,21 @@ def train_and_compare_models(test_name, distribution, num_items, num_episodes, e
         tile_width=np.array([1, (reward_high - reward_low) / 100])
     )
     # NN pi/V for REINFORCE Agent
-    pi = PiApproximationWithNN(2, 2, 3e-4)
+    pi_baseline = PiApproximationWithNN(2, 2, 3e-4)
+    pi_no_baseline = PiApproximationWithNN(2, 2, 3e-4)
     V = VApproximationWithNN(2, 3e-4)
 
     # Add agents here
     agents = [
         # DQN(env),
-        # SarsaLambdaAgent(env=env, gamma=1, lam=0.2, alpha=0.05, X=tile_coding),
-        # REINFORCEAgent(env=env, gamma=1, pi=pi, V=V),
-        # MedianMaxThreshold(env),
-        # OCRSBased(env),
-        # SingleSampleMaxThreshold(env),
-        # RandomChoice(env),
-        OptimalAgent(env),
+        # SarsaLambdaAgent(env=env, name='SarsaLambdaAgent', gamma=1, lam=0.2, alpha=0.05, X=tile_coding),
+        # REINFORCEAgent(env=env, name='REINFORCEWithBaseline', gamma=1, pi=pi_baseline, V=V),
+        REINFORCEAgent(env=env, name='REINFORCEWithoutBaseline', gamma=1, pi=pi_no_baseline, V=Baseline(0.)),
+        # MedianMaxThreshold(env, name='MedianMaxThreshold'),
+        # OCRSBased(env, name='OCRSBased'),
+        # SingleSampleMaxThreshold(env, name='SingleSampleMaxThreshold'),
+        # RandomChoice(env, name='RandomChoice'),
+        # OptimalAgent(env, name='OptimalAgent'),
     ]
 
     for agent in agents:
@@ -66,21 +67,21 @@ def train_and_compare_models(test_name, distribution, num_items, num_episodes, e
 
 
 # Exponential
-# train_and_compare_models(
-#     test_name='Expon-15-1m-10k-10k',
-#     distribution=stats.expon(loc=0, scale=100),
-#     num_items=15,
-#     num_episodes=1_000_000,
-#     evaluate_interval=10_000,
-#     samples_per_eval=10_000
-# )
+train_and_compare_models(
+    test_name='Expon-15-1m-10k-10k',
+    distribution=stats.expon(loc=0, scale=100),
+    num_items=15,
+    num_episodes=1_000_000,
+    evaluate_interval=10_000,
+    samples_per_eval=10_000
+)
 
 # Uniform
 train_and_compare_models(
     test_name='Uniform-15-1m-10k-10k',
     distribution=stats.uniform(loc=0, scale=100),
     num_items=15,
-    num_episodes=100_000,
+    num_episodes=1_000_000,
     evaluate_interval=10_000,
     samples_per_eval=10_000
 )
@@ -88,19 +89,19 @@ train_and_compare_models(
 # Use this later when we have enough files
 # plot_test_rewards(
 #     test_name='Uniform-15-1m-10k-10k',
-#     num_episodes=100_000,
+#     num_episodes=1_000_000,
 #     evaluate_interval=10_000
 # )
 
 # Half Normal
-# train_and_compare_models(
-#     test_name='Halfnorm-15-1m-10k-10k',
-#     distribution=stats.halfnorm(loc=0, scale=100),
-#     num_items=15,
-#     num_episodes=1_000_000,
-#     evaluate_interval=10_000,
-#     samples_per_eval=10_000
-# )
+train_and_compare_models(
+    test_name='Halfnorm-15-1m-10k-10k',
+    distribution=stats.halfnorm(loc=0, scale=100),
+    num_items=15,
+    num_episodes=1_000_000,
+    evaluate_interval=10_000,
+    samples_per_eval=10_000
+)
 
 # # Initialize environment
 

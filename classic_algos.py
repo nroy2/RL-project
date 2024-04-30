@@ -2,8 +2,8 @@ from prophet import ProphetInequalityEnv, ProphetInequalityAgent
 import numpy as np
 
 class MedianMaxThreshold(ProphetInequalityAgent):
-    def __init__(self, env: ProphetInequalityEnv):
-        self.name = 'MedianMaxThreshold'
+    def __init__(self, env, name):
+        super().__init__(env, name)
         info = env._get_info()
         distrib, num_items = info['distribution'], info['num_items']
         self.num_items = num_items
@@ -14,8 +14,8 @@ class MedianMaxThreshold(ProphetInequalityAgent):
         return item_index == self.num_items - 1 or item_value >= self.threshold
 
 class OCRSBased(ProphetInequalityAgent):
-    def __init__(self, env: ProphetInequalityEnv):
-        self.name = 'OCRSBased'
+    def __init__(self, env, name):
+        super().__init__(env, name)
         info = env._get_info()
         distrib, num_items = info['distribution'], info['num_items']
         self.num_items = num_items
@@ -26,8 +26,8 @@ class OCRSBased(ProphetInequalityAgent):
         return item_index == self.num_items - 1 or (item_value >= self.threshold and np.random.binomial(1, 0.5))
 
 class SingleSampleMaxThreshold(ProphetInequalityAgent):
-    def __init__(self, env: ProphetInequalityEnv):
-        self.name = 'SingleSampleMaxThreshold'
+    def __init__(self, env, name):
+        super().__init__(env, name)
         info = env._get_info()
         distrib, num_items = info['distribution'], info['num_items']
         self.distrib = distrib
@@ -40,8 +40,8 @@ class SingleSampleMaxThreshold(ProphetInequalityAgent):
         return item_index == self.num_items - 1 or item_value >= self.threshold
 
 class OptimalAgent(ProphetInequalityAgent):
-    def __init__(self, env: ProphetInequalityEnv):
-        self.name = 'OptimalAgent'
+    def __init__(self, env, name):
+        super().__init__(env, name)
         info = env._get_info()
         distrib, num_items = info['distribution'], info['num_items']
         self.threshold = np.zeros((num_items))
@@ -56,8 +56,8 @@ class OptimalAgent(ProphetInequalityAgent):
         return item_value > self.threshold[int(item_index)]
 
 class RandomChoice(ProphetInequalityAgent):
-    def __init__(self, env: ProphetInequalityEnv):
-        self.name = 'RandomChoice'
+    def __init__(self, env, name):
+        super().__init__(env, name)
 
     def select_action(self, state):
         return 1

@@ -2,9 +2,9 @@ from prophet import ProphetInequalityEnv, ProphetInequalityAgent
 import torch
 
 class REINFORCEAgent(ProphetInequalityAgent):
-    def __init__(self, env, gamma, pi, V):
-        self.name = 'REINFORCEAgent'
-        self.env, self.gamma, self.pi, self.V = env, gamma, pi, V
+    def __init__(self, env, name, gamma, pi, V):
+        super().__init__(env, name)
+        self.gamma, self.pi, self.V = gamma, pi, V
     
     def select_action(self, state):
         return self.pi(state)

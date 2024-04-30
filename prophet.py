@@ -64,8 +64,8 @@ class ProphetInequalityEnv(Env):
         pass
 
 class ProphetInequalityAgent(object):
-    def __init__(self):
-        pass
+    def __init__(self, env: ProphetInequalityEnv, name: str):
+        self.env, self.name = env, name
 
     def select_action(self, state) -> int:
         return 1
