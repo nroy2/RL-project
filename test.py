@@ -44,15 +44,14 @@ def train_and_compare_models(test_name, distribution, num_items, num_episodes, e
 
     # Add agents here
     agents = [
-        # DQN(env),
-        # SarsaLambdaAgent(env=env, name='SarsaLambdaAgent', gamma=1, lam=0.2, alpha=0.05, X=tile_coding),
-        # REINFORCEAgent(env=env, name='REINFORCEWithBaseline', gamma=1, pi=pi_baseline, V=V),
-        REINFORCEAgent(env=env, name='REINFORCEWithoutBaseline', gamma=1, pi=pi_no_baseline, V=Baseline(0.)),
-        # MedianMaxThreshold(env, name='MedianMaxThreshold'),
-        # OCRSBased(env, name='OCRSBased'),
-        # SingleSampleMaxThreshold(env, name='SingleSampleMaxThreshold'),
-        # RandomChoice(env, name='RandomChoice'),
-        # OptimalAgent(env, name='OptimalAgent'),
+        DQN(env),
+        # SarsaLambdaAgent(env=env, gamma=1, lam=0.2, alpha=0.05, X=tile_coding),
+        # REINFORCEAgent(env=env, gamma=1, pi=pi, V=V),
+        # MedianMaxThreshold(env),
+        # OCRSBased(env),
+        # SingleSampleMaxThreshold(env),
+        # RandomChoice(env),
+        # OptimalAgent(env),
     ]
 
     for agent in agents:
@@ -61,29 +60,29 @@ def train_and_compare_models(test_name, distribution, num_items, num_episodes, e
         reward_file_name = f"reward_file/{test_name}_{agent.name}"
         with open(reward_file_name, 'wb') as f:
             np.save(f, rewards)
-        agent.save_model(fn=f"model_file/{test_name}_{agent.name}")
+        # agent.save_model(fn=f"model_file/{test_name}_{agent.name}")
 
     plot_test_rewards(test_name, num_episodes, evaluate_interval)
 
 
 # Exponential
 train_and_compare_models(
-    test_name='Expon-15-1m-10k-10k',
+    test_name='Expon-15-1k-10-100',
     distribution=stats.expon(loc=0, scale=100),
     num_items=15,
-    num_episodes=1_000_000,
-    evaluate_interval=10_000,
-    samples_per_eval=10_000
+    num_episodes=1_000,
+    evaluate_interval=10,
+    samples_per_eval=100
 )
 
 # Uniform
 train_and_compare_models(
-    test_name='Uniform-15-1m-10k-10k',
+    test_name='Uniform-15-1k-10-100',
     distribution=stats.uniform(loc=0, scale=100),
     num_items=15,
-    num_episodes=1_000_000,
-    evaluate_interval=10_000,
-    samples_per_eval=10_000
+    num_episodes=1_000,
+    evaluate_interval=10,
+    samples_per_eval=100
 )
 
 # Use this later when we have enough files
@@ -95,12 +94,12 @@ train_and_compare_models(
 
 # Half Normal
 train_and_compare_models(
-    test_name='Halfnorm-15-1m-10k-10k',
+    test_name='Halfnorm-15-1k-10-100',
     distribution=stats.halfnorm(loc=0, scale=100),
     num_items=15,
-    num_episodes=1_000_000,
-    evaluate_interval=10_000,
-    samples_per_eval=10_000
+    num_episodes=1_000,
+    evaluate_interval=10,
+    samples_per_eval=100
 )
 
 # # Initialize environment

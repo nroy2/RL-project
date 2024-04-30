@@ -17,7 +17,7 @@ class DQN(ProphetInequalityAgent):
 
         self.memory  = deque(maxlen=2000)
         
-        self.gamma = 0.85
+        self.gamma = 1 # 0.85
         self.epsilon = 1.0
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
@@ -38,11 +38,11 @@ class DQN(ProphetInequalityAgent):
         model.summary()
         return model
 
-    def select_action(self, state):
+    def select_action(self, state, training=False):
         state = state.reshape(1, -1)
         self.epsilon *= self.epsilon_decay
         self.epsilon = max(self.epsilon_min, self.epsilon)
-        if np.random.random() < self.epsilon:
+        if training and np.random.random() < self.epsilon:
             return self.env.action_space.sample()
         return np.argmax(self.model.predict(state, verbose=False)[0])
 
@@ -57,6 +57,8 @@ class DQN(ProphetInequalityAgent):
         samples = random.sample(self.memory, batch_size)
         for sample in samples:
             state, action, reward, new_state, done = sample
+            state = state.reshape(1, -1)
+            new_state = new_state.reshape(1, -1)
             target = self.target_model.predict(state, verbose=False)
             if done:
                 target[0][action] = reward
@@ -78,7 +80,7 @@ class DQN(ProphetInequalityAgent):
     def train_one_episode(self):
         cur_state = self.env.reset()
         while True:
-            action = self.select_action(cur_state)
+            action = self.select_action(cur_state, training=True)
             new_state, reward, done, _ = self.env.step(action)
 
             # reward = reward if not done else -20
