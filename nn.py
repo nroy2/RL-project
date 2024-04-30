@@ -21,7 +21,7 @@ class PiApproximationWithNN(nn.Module):
             nn.Linear(32, 32).double(),
             nn.ReLU().double(),
             nn.Linear(32, num_actions).double(),
-            nn.Softmin().double()
+            nn.Softmax().double()
         )
         self.optimizer = optim.Adam(
             params=self.model.parameters(),

@@ -34,11 +34,9 @@ class REINFORCEAgent(ProphetInequalityAgent):
 
     def save_model(self, fn):
         torch.save({
-            'V': self.V.state_dict(),
             'pi': self.pi.state_dict()
         }, fn)
     
     def load_model(self, fn):
         checkpoint = torch.load(fn)
-        self.V.load_state_dict(checkpoint['V'])
         self.pi.load_state_dict(checkpoint['pi'])
