@@ -16,12 +16,12 @@ class PiApproximationWithNN(nn.Module):
         super(PiApproximationWithNN, self).__init__()
         self.num_actions = num_actions
         self.model = nn.Sequential(
-            nn.Linear(state_dims, 16).double(),
+            nn.Linear(state_dims, 32).double(),
             nn.ReLU().double(),
-            nn.Linear(16, 16).double(),
+            nn.Linear(32, 32).double(),
             nn.ReLU().double(),
-            nn.Linear(16, num_actions).double(),
-            nn.Softmax().double()
+            nn.Linear(32, num_actions).double(),
+            nn.Softmin().double()
         )
         self.optimizer = optim.Adam(
             params=self.model.parameters(),
@@ -87,11 +87,11 @@ class VApproximationWithNN(nn.Module):
         """
         super(VApproximationWithNN, self).__init__()
         self.model = nn.Sequential(
-            nn.Linear(state_dims, 16).double(),
+            nn.Linear(state_dims, 32).double(),
             nn.ReLU().double(),
-            nn.Linear(16, 16).double(),
+            nn.Linear(32, 32).double(),
             nn.ReLU().double(),
-            nn.Linear(16, 1).double()
+            nn.Linear(32, 1).double()
         )
         self.optimizer = optim.Adam(
             params=self.model.parameters(),

@@ -4,7 +4,7 @@ from prophet import ProphetInequalityAgent
 class SarsaLambdaAgent(ProphetInequalityAgent):
     def __init__(self, env, name, gamma, lam, alpha, X):
         super().__init__(env, name)
-        self.gamma, self.lam, self.alpha, self.X = env, gamma, lam, alpha, X
+        self.gamma, self.lam, self.alpha, self.X = gamma, lam, alpha, X
         self.total_episode_count = 0
         self.w = np.zeros((X.feature_vector_len()))
 
