@@ -15,17 +15,17 @@ class ProphetInequalityEnv(Env):
         self.item_index = 0
         self.item_value = self.distribution.rvs()
 
+        # Reward range
+        self.reward_range = (self.distribution.ppf(0), self.distribution.ppf(1))
+
         # State space
         self.observation_space = Dict({
             "item_index": Discrete(self.num_items + 1), # account for beyond the last item
-            "item_value": Box(low=self.distribution.a, high=self.distribution.b, shape=())
+            "item_value": Box(low=self.reward_range[0], high=self.reward_range[1], shape=())
         })
 
         # Actions we can take: pass on reward, or take reward
         self.action_space = Discrete(2)
-
-        # Reward range
-        self.reward_range = (self.distribution.a, self.distribution.b)
 
     def _get_obs(self):
         return {"item_index": self.item_index, "item_value": self.item_value}
@@ -36,11 +36,11 @@ class ProphetInequalityEnv(Env):
     def step(self, action):
         if action == 1:
             done = True
-            observation = self._get_obs()
+            state = np.array([self.item_index, self.item_value])
             reward = self.item_value
             info = self._get_info()
 
-            return observation, reward, done, info
+            return state, reward, done, info
         else:
             self.item_index = min(self.item_index + 1, self.num_items) # disallowing taking more boxes when it's time
             if self.item_index < self.num_items:
@@ -49,19 +49,18 @@ class ProphetInequalityEnv(Env):
                 self.item_value = 0
 
             done = self.item_index >= self.num_items
-            observation = self._get_obs()
+            state = np.array([self.item_index, self.item_value])
             info = self._get_info()
             reward = 0
 
-            return observation, reward, done, info
+            return state, reward, done, info
 
     def reset(self):
         self.item_index = 0
         self.item_value = self.distribution.rvs()
 
-        observation = self._get_obs()
-        info = self._get_info()
-        return observation, info
+        state = np.array([self.item_index, self.item_value])
+        return state
 
     def render(self, mode='human'):
         pass
@@ -77,6 +76,9 @@ class ProphetInequalityAgent(object):
 
     def select_action(self, state) -> int:
         return 1
-    
-    def update(self, state, action, reward, next_state):
+
+    def train_one_episode(self):
+        pass
+
+    def update(self, state, action, reward, done, next_state):
         pass
