@@ -1,6 +1,6 @@
 import gym
 from gym import Env
-from gym.spaces import Discrete, Dict, Box
+from gym.spaces import Discrete, Box, Tuple
 import numpy as np
 
 class ProphetInequalityEnv(Env):
@@ -19,10 +19,8 @@ class ProphetInequalityEnv(Env):
         self.reward_range = (self.distribution.ppf(0), self.distribution.ppf(1))
 
         # State space
-        self.observation_space = Dict({
-            "item_index": Discrete(self.num_items + 1), # account for beyond the last item
-            "item_value": Box(low=self.reward_range[0], high=self.reward_range[1], shape=())
-        })
+        self.observation_space = Box(low=np.array([0, self.reward_range[0]]), high=np.array([num_items, self.reward_range[1]]))
+        # self.observation_space = Tuple(Discrete(self.num_items + 1), Box(low=self.reward_range[0], high=self.reward_range[1], shape=(1)))
 
         # Actions we can take: pass on reward, or take reward
         self.action_space = Discrete(2)
@@ -69,16 +67,8 @@ class ProphetInequalityAgent(object):
     def __init__(self):
         pass
 
-    # This is only restrcited to classic algorithms
-    # RL-based should not use this function
-    def init_new_episode(self, info):
-        pass
-
     def select_action(self, state) -> int:
         return 1
 
     def train_one_episode(self):
-        pass
-
-    def update(self, state, action, reward, done, next_state):
         pass

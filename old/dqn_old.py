@@ -1,5 +1,3 @@
-from prophet import ProphetInequalityEnv, ProphetInequalityAgent
-
 from tensorflow import keras
 from keras.layers import Dense, Flatten
 from keras.models import Sequential
@@ -8,13 +6,12 @@ from collections import deque
 from scipy import stats
 import matplotlib.pyplot as plt
 import pickle as pkl
+from prophet import ProphetInequalityEnv
 import numpy as np
 import random
 
-class DQN(ProphetInequalityAgent):
+class DQN:
     def __init__(self, env):
-        self.name = 'DQN'
-
         self.env     = env
         self.memory  = deque(maxlen=2000)
         
@@ -39,13 +36,12 @@ class DQN(ProphetInequalityAgent):
         model.summary()
         return model
 
-    def select_action(self, state):
-        state = state.reshape(1, -1)
+    def act(self, state):
         self.epsilon *= self.epsilon_decay
         self.epsilon = max(self.epsilon_min, self.epsilon)
         if np.random.random() < self.epsilon:
             return self.env.action_space.sample()
-        return np.argmax(self.model.predict(state, verbose=False)[0])
+        return np.argmax(self.model.predict(state)[0])
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.append([state, action, reward, new_state, done])
@@ -58,11 +54,11 @@ class DQN(ProphetInequalityAgent):
         samples = random.sample(self.memory, batch_size)
         for sample in samples:
             state, action, reward, new_state, done = sample
-            target = self.target_model.predict(state, verbose=False)
+            target = self.target_model.predict(state)
             if done:
                 target[0][action] = reward
             else:
-                Q_future = max(self.target_model.predict(new_state, verbose=False)[0])
+                Q_future = max(self.target_model.predict(new_state)[0])
                 target[0][action] = reward + Q_future * self.gamma
             self.model.fit(state, target, epochs=1, verbose=0)
 
@@ -76,63 +72,47 @@ class DQN(ProphetInequalityAgent):
     def save_model(self, fn):
         self.model.save(fn)
 
-    def train_one_episode(self):
-        cur_state = self.env.reset()
-        while True:
-            action = self.select_action(cur_state)
-            new_state, reward, done, _ = self.env.step(action)
+distribution = stats.uniform(loc=0, scale=100)
+num_items = 15
+env = ProphetInequalityEnv(distribution=distribution, num_items=num_items)
+
+gamma   = 1 # 0.9
+epsilon = .95
+
+trials  = 100
+trial_len = 15
+
+rewards = []
+dqn_agent = DQN(env=env)
+
+for i in range(trials):
+    avg_reward = 0
+    for trial in range(trials):
+        cur_state = env.reset().reshape(1,-1)
+        for step in range(trial_len):
+            action = dqn_agent.act(cur_state)
+            new_state, reward, done, _ = env.step(action)
 
             # reward = reward if not done else -20
-            self.remember(cur_state, action, reward, new_state, done)
+            new_state = new_state.reshape(1,-1)
+            dqn_agent.remember(cur_state, action, reward, new_state, done)
             
-            self.replay()       # internally iterates default (prediction) model
-            self.target_train() # iterates target model
+            dqn_agent.replay()       # internally iterates default (prediction) model
+            dqn_agent.target_train() # iterates target model
 
             cur_state = new_state
             if done:
+                avg_reward += reward
+                print(f'trial {i} {trial} done')
                 break
+    rewards.append(avg_reward/trials)
 
-# distribution = stats.uniform(loc=0, scale=100)
-# num_items = 15
-# env = ProphetInequalityEnv(distribution=distribution, num_items=num_items)
-
-# gamma   = 1 # 0.9
-# epsilon = .95
-
-# trials  = 100
-# trial_len = 15
-
-# rewards = []
-# dqn_agent = DQN(env=env)
-
-# for i in range(trials):
-#     avg_reward = 0
-#     for trial in range(trials):
-#         cur_state = env.reset().reshape(1,-1)
-#         for step in range(trial_len):
-#             action = dqn_agent.act(cur_state)
-#             new_state, reward, done, _ = env.step(action)
-
-#             # reward = reward if not done else -20
-#             new_state = new_state.reshape(1,-1)
-#             dqn_agent.remember(cur_state, action, reward, new_state, done)
-            
-#             dqn_agent.replay()       # internally iterates default (prediction) model
-#             dqn_agent.target_train() # iterates target model
-
-#             cur_state = new_state
-#             if done:
-#                 avg_reward += reward
-#                 print(f'trial {i} {trial} done')
-#                 break
-#     rewards.append(avg_reward/trials)
-
-# dqn_agent.save_model("trained.keras")
+dqn_agent.save_model("trained.keras")
 
 
-# newrewards = np.asarray(rewards)
-# np.save('rewards',newrewards)
+newrewards = np.asarray(rewards)
+np.save('rewards',newrewards)
 
-# rewards = np.load('rewards.npy')
-# plt.plot(rewards)
-# plt.savefig('dqnrewards.svg')
+rewards = np.load('rewards.npy')
+plt.plot(rewards)
+plt.savefig('dqnrewards.svg')

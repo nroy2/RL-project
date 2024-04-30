@@ -1,13 +1,14 @@
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
+from trainer import train_agent
 from prophet import ProphetInequalityEnv
 
 from tile_coding import StateActionFeatureVectorWithTile
 
 from classic_algos import *
 from sarsa import SarsaLambdaAgent
-from trainer import train_agent
+from dqn import DQN
 
 # Initialize environment
 
@@ -19,9 +20,9 @@ env = ProphetInequalityEnv(distribution=distribution, num_items=num_items)
 reward_low, reward_high = env.reward_range
 
 # Set hyperparameters
-num_episodes = 1_000_000
-evaluate_interval = 10_000
-samples_per_eval = 10_000
+num_episodes = 100
+evaluate_interval = 1
+samples_per_eval = 100
 
 # Plotting stuff
 
@@ -36,11 +37,12 @@ tile_coding = StateActionFeatureVectorWithTile(
 
 #TODO: add agents here - for example, q-learning, sarsa, dqn, so on
 agents = [
-    SarsaLambdaAgent(env=env, gamma=1, lam=0.2, alpha=0.05, X=tile_coding),
-    MedianMaxThreshold(env),
-    OCRSBased(env),
-    SingleSampleMaxThreshold(env),
-    RandomChoice(env)
+    DQN(env)
+    # SarsaLambdaAgent(env=env, gamma=1, lam=0.2, alpha=0.05, X=tile_coding),
+    # MedianMaxThreshold(env),
+    # OCRSBased(env),
+    # SingleSampleMaxThreshold(env),
+    # RandomChoice(env)
 ]
 
 for agent in agents:
